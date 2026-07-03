@@ -7,8 +7,8 @@ import eventIcon from '../assets/event.png'
 import ConfirmModal from './ConfirmModal'
 
 const MOODS = {
-  'Joie': '#ffd700', 'Colère': '#ff3333', 'Peur': '#aa00ff', 
-  'Tristesse': '#0088ff', 'Dégoût': '#00cc44', 'Surprise': '#ff8800', 
+  'Joie': '#ffd700', 'Colère': '#ff3333', 'Anxiété': '#aa00ff', 
+  'Tristesse': '#0088ff', 'Dégoût': '#00cc44', 'Stress': '#ff8800', 
   'Anticipation': '#00e5ff', 'Confiance': '#a6ff00', 'Sérénité': '#e81099'
 }
 const MOOD_CATEGORIES = Object.keys(MOODS)
