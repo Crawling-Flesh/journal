@@ -7,6 +7,7 @@ import DayDetailsModal from './DayDetailsModal'
 import journalIcon from '../assets/journal.png'
 import meteoIcon from '../assets/meteo.png'
 import eventIcon from '../assets/event.png'
+import bonheurIcon from '../assets/bonheur.png'
 import StatsSummaryModal from './StatsSummaryModal'
 
 const MOODS = {
@@ -28,7 +29,7 @@ export default function StatsPage({ onNavigateToDate }) {
   const [activeFilter, setActiveFilter] = useState('meteo')
   const [selectedDay, setSelectedDay] = useState(null)
   // NOUVEAU : On stocke toutes les données du mois ici
-  const [monthData, setMonthData] = useState({ journal: [], meteo: [], event: [] })
+  const [monthData, setMonthData] = useState({ journal: [], meteo: [], event: [], bonheur: [] })
   const [summaryModalType, setSummaryModalType] = useState(null)
 
   const displayMonth = format(currentMonth, 'MMMM yyyy', { locale: fr })
@@ -47,16 +48,18 @@ export default function StatsPage({ onNavigateToDate }) {
       const endStr = format(end, 'yyyy-MM-dd')
 
       // Requêtes parallèles pour aller vite
-      const [journalRes, meteoRes, eventRes] = await Promise.all([
+      const [journalRes, meteoRes, eventRes, bonheurRes] = await Promise.all([
         supabase.from('journal').select('date').gte('date', startStr).lte('date', endStr).eq('user_id', user.id),
         supabase.from('meteo').select('*').gte('date', startStr).lte('date', endStr).eq('user_id', user.id),
-        supabase.from('evenements').select('date').gte('date', startStr).lte('date', endStr).eq('user_id', user.id)
+        supabase.from('evenements').select('date').gte('date', startStr).lte('date', endStr).eq('user_id', user.id),
+        supabase.from('bonheurs').select('date, items').gte('date', startStr).lte('date', endStr).eq('user_id', user.id)
       ])
 
       setMonthData({
         journal: journalRes.data || [],
         meteo: meteoRes.data || [],
-        event: eventRes.data || []
+        event: eventRes.data || [],
+        bonheur: bonheurRes.data || []
       })
     }
 
@@ -80,13 +83,7 @@ export default function StatsPage({ onNavigateToDate }) {
       </header>
 
       <div className="stats-filters">
-        <button 
-          className={`filter-btn journal ${activeFilter === 'journal' ? 'active' : ''}`}
-          onClick={() => setActiveFilter('journal')}
-          style={{ backgroundColor: 'var(--color-journal)' }}
-        >
-          <div className="custom-icon" style={{ WebkitMaskImage: `url(${journalIcon})`, backgroundColor: '#000' }}></div>
-        </button>
+        
 
         <button 
           className={`filter-btn meteo ${activeFilter === 'meteo' ? 'active' : ''}`}
@@ -95,13 +92,27 @@ export default function StatsPage({ onNavigateToDate }) {
         >
           <div className="custom-icon" style={{ WebkitMaskImage: `url(${meteoIcon})`, backgroundColor: '#000' }}></div>
         </button>
-
+<button 
+          className={`filter-btn journal ${activeFilter === 'journal' ? 'active' : ''}`}
+          onClick={() => setActiveFilter('journal')}
+          style={{ backgroundColor: 'var(--color-journal)' }}
+        >
+          <div className="custom-icon" style={{ WebkitMaskImage: `url(${journalIcon})`, backgroundColor: '#000' }}></div>
+        </button>
         <button 
           className={`filter-btn event ${activeFilter === 'event' ? 'active' : ''}`}
           onClick={() => setActiveFilter('event')}
           style={{ backgroundColor: 'var(--color-event)' }}
         >
           <div className="custom-icon" style={{ WebkitMaskImage: `url(${eventIcon})`, backgroundColor: '#000' }}></div>
+        </button>
+
+        <button 
+          className={`filter-btn bonheur ${activeFilter === 'bonheur' ? 'active' : ''}`}
+          onClick={() => setActiveFilter('bonheur')}
+          style={{ backgroundColor: '#ffd700' }} // Jaune !
+        >
+          <div className="custom-icon" style={{ WebkitMaskImage: `url(${bonheurIcon})`, backgroundColor: '#000' }}></div>
         </button>
         {/* LA MODALE DE DÉTAILS */}
       {selectedDay && (
@@ -120,6 +131,8 @@ export default function StatsPage({ onNavigateToDate }) {
           const hasJournal = monthData.journal.some(j => j.date === dayStr)
           const hasEvent = monthData.event.some(e => e.date === dayStr)
           const dayMeteo = monthData.meteo.find(m => m.date === dayStr)
+          const dayBonheurs = monthData.bonheur.find(b => b.date === dayStr)
+          const hasBonheurs = dayBonheurs && dayBonheurs.items && dayBonheurs.items.length > 0
 
           // Construction dynamique des classes
           let squareClass = 'day-square'
@@ -128,6 +141,7 @@ export default function StatsPage({ onNavigateToDate }) {
           
           if (activeFilter === 'journal' && hasJournal) squareClass += ' has-journal'
           if (activeFilter === 'event' && hasEvent) squareClass += ' has-event'
+          if (activeFilter === 'bonheur' && hasBonheurs) squareClass += ' has-bonheur'
 
           return (
             <div 

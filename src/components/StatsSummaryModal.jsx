@@ -18,7 +18,8 @@ const MOOD_CATEGORIES = Object.keys(MOODS)
 
 export default function StatsSummaryModal({ type, currentDate, monthData, onClose }) {
   const [loading, setLoading] = useState(type === 'global')
-  const [stats, setStats] = useState({ journalCount: 0, eventCount: 0, averages: {} })
+  // 1. AJOUT : On ajoute le compteur de bonheurs à l'état initial
+  const [stats, setStats] = useState({ journalCount: 0, eventCount: 0, bonheurCount: 0, averages: {} })
 
   useEffect(() => {
     const calculateAverages = (meteoArray) => {
@@ -51,24 +52,38 @@ export default function StatsSummaryModal({ type, currentDate, monthData, onClos
     const processData = async () => {
       if (type === 'month') {
         // Mode MOIS : On utilise les données déjà téléchargées par StatsPage
+        // On compte le total des items dans tous les tableaux de bonheurs du mois
+        const totalBonheursMonth = monthData.bonheur 
+          ? monthData.bonheur.reduce((acc, row) => acc + (row.items?.length || 0), 0) 
+          : 0
+
         setStats({
           journalCount: monthData.journal.length,
           eventCount: monthData.event.length,
+          bonheurCount: totalBonheursMonth, // 2. AJOUT : La valeur pour le mois
           averages: calculateAverages(monthData.meteo)
         })
       } else {
         // Mode GLOBAL : On requête la base de données
         const { data: { user } } = await supabase.auth.getUser()
         
-        const [journalRes, eventRes, meteoRes] = await Promise.all([
+        // 3. AJOUT : On ajoute la requête pour chercher tous les bonheurs
+        const [journalRes, eventRes, meteoRes, bonheurRes] = await Promise.all([
           supabase.from('journal').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
           supabase.from('evenements').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
-          supabase.from('meteo').select('*').eq('user_id', user.id)
+          supabase.from('meteo').select('*').eq('user_id', user.id),
+          supabase.from('bonheurs').select('items').eq('user_id', user.id)
         ])
+
+        // On compte le total des items dans tous les tableaux de bonheurs globaux
+        const totalBonheursGlobal = bonheurRes.data 
+          ? bonheurRes.data.reduce((acc, row) => acc + (row.items?.length || 0), 0) 
+          : 0
 
         setStats({
           journalCount: journalRes.count || 0,
           eventCount: eventRes.count || 0,
+          bonheurCount: totalBonheursGlobal, // 4. AJOUT : La valeur globale
           averages: calculateAverages(meteoRes.data || [])
         })
         setLoading(false)
@@ -101,6 +116,11 @@ export default function StatsSummaryModal({ type, currentDate, monthData, onClos
               <div className="stat-card" style={{ borderColor: 'var(--color-event)' }}>
                 <h3 style={{ color: 'var(--color-event)' }}>{stats.eventCount}</h3>
                 <p>Événements</p>
+              </div>
+              {/* 5. AJOUT : La nouvelle carte pour l'affichage des bonheurs */}
+              <div className="stat-card" style={{ borderColor: 'var(--color-bonheur)' }}>
+                <h3 style={{ color: 'var(--color-bonheur)' }}>{stats.bonheurCount}</h3>
+                <p>Bonheurs</p>
               </div>
             </div>
 

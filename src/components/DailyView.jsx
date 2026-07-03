@@ -8,6 +8,8 @@ import journalIcon from '../assets/journal.png'
 import eventIcon from '../assets/event.png'
 import JournalListModal from './JournalListModal'
 import EventListModal from './EventListModal'
+import bonheurIcon from '../assets/bonheur.png';
+import BonheurModal from './BonheurModal';
 
 const MOODS = {
   'Joie': '#ffd700', 
@@ -56,12 +58,16 @@ export default function DailyView({ targetDate }) {
   const [eventName, setEventName] = useState('')
   const [eventTags, setEventTags] = useState({ avant: [], pendant: [], apres: [] })
 
+const [currentUser, setCurrentUser] = useState(null); // On sauvegarde l'utilisateur pour la modale
+  const [hasBonheurs, setHasBonheurs] = useState(false);
+
   // --- LE CHARGEMENT DES DONNÉES (S'exécute quand la date change) ---
   useEffect(() => {
     const loadDayData = async () => {
       const dateStr = format(currentDate, 'yyyy-MM-dd')
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
+      setCurrentUser(user)
 
       // 1. Charger la météo du jour
       const { data: meteoData } = await supabase
@@ -99,6 +105,16 @@ export default function DailyView({ targetDate }) {
         .eq('user_id', user.id)
       
       setEventsCount(eCount || 0)
+
+      // 4. Vérifier s'il y a des petits bonheurs
+      const { data: bonheurData } = await supabase
+        .from('bonheurs')
+        .select('items')
+        .eq('date', dateStr)
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      setHasBonheurs(bonheurData && bonheurData.items && bonheurData.items.length > 0)
     }
 
     loadDayData()
@@ -236,6 +252,16 @@ export default function DailyView({ targetDate }) {
   onClick={() => setActiveModal('journalList')}
 ></div>
             
+<div 
+  className="card-icon center custom-icon"
+  style={{ 
+    WebkitMaskImage: `url(${bonheurIcon})`, 
+    backgroundColor: hasBonheurs ? '#ffd700' : '#ffffff', /* Jaune si actif, blanc par défaut */
+    cursor: 'pointer' 
+  }}
+  onClick={() => setActiveModal('bonheur')}
+></div>
+
             <div 
   className="card-icon right custom-icon" 
   style={{ WebkitMaskImage: `url(${eventIcon})`, backgroundColor: eventsCount > 0 ? 'var(--color-event)' : '#ffffff', cursor: 'pointer' }}
@@ -247,15 +273,18 @@ export default function DailyView({ targetDate }) {
             <button className={`fab-main ${isFabOpen ? 'open' : ''}`} onClick={() => setIsFabOpen(!isFabOpen)}>+</button>
             
             <div className={`fab-menu ${isFabOpen ? 'open' : ''}`}>
-              <button className="fab-item" style={{ backgroundColor: 'var(--color-journal)' }} onClick={() => openModal('journal')}>
-                <div className="custom-icon" style={{ WebkitMaskImage: `url(${journalIcon})`, backgroundColor: '#000' }}></div>
-              </button>
-              <button className="fab-item" style={{ backgroundColor: 'var(--color-meteo)' }} onClick={() => openModal('meteo')}>
+                           <button className="fab-item" style={{ backgroundColor: 'var(--color-meteo)' }} onClick={() => openModal('meteo')}>
                 <div className="custom-icon" style={{ WebkitMaskImage: `url(${meteoIcon})`, backgroundColor: '#000' }}></div>
+              </button>
+               <button className="fab-item" style={{ backgroundColor: 'var(--color-journal)' }} onClick={() => openModal('journal')}>
+                <div className="custom-icon" style={{ WebkitMaskImage: `url(${journalIcon})`, backgroundColor: '#000' }}></div>
               </button>
               <button className="fab-item" style={{ backgroundColor: 'var(--color-event)' }} onClick={() => openModal('event')}>
                 <div className="custom-icon" style={{ WebkitMaskImage: `url(${eventIcon})`, backgroundColor: '#000' }}></div>
               </button>
+              <button className="fab-item" style={{ backgroundColor: '#ffd700' }} onClick={() => openModal('bonheur')}>
+  <div className="custom-icon" style={{ WebkitMaskImage: `url(${bonheurIcon})`, backgroundColor: '#000' }}></div>
+</button>
             </div>
           </div>
         </div>
@@ -370,7 +399,15 @@ export default function DailyView({ targetDate }) {
           />
         </div>
       )}
-      
+      {activeModal === 'bonheur' && currentUser && (
+        <BonheurModal 
+          isOpen={activeModal === 'bonheur'}
+          onClose={() => setActiveModal(null)}
+          dateStr={format(currentDate, 'yyyy-MM-dd')}
+          user={currentUser}
+          onSaveSuccess={(hasItems) => setHasBonheurs(hasItems)}
+        />
+      )}
     </div>
   )
 }

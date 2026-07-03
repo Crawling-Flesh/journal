@@ -6,6 +6,7 @@ import { supabase } from '../supabase'
 import journalIcon from '../assets/journal.png'
 import meteoIcon from '../assets/meteo.png'
 import eventIcon from '../assets/event.png'
+import bonheurIcon from '../assets/bonheur.png'
 
 const MOODS = {
   'Joie': '#ffd700', 
@@ -20,7 +21,8 @@ const MOODS = {
 }
 
 export default function DayDetailsModal({ date, onClose, onGoToDay }) {
-  const [dayData, setDayData] = useState({ journal: [], meteo: null, events: [] })
+  // 1. AJOUT : On ajoute 'bonheurs: []' dans l'état initial
+  const [dayData, setDayData] = useState({ journal: [], meteo: null, events: [], bonheurs: [] })
   const [isLoading, setIsLoading] = useState(true)
   
   const displayDate = format(date, 'EEEE d MMMM yyyy', { locale: fr })
@@ -33,17 +35,19 @@ export default function DayDetailsModal({ date, onClose, onGoToDay }) {
 
       const dateStr = format(date, 'yyyy-MM-dd')
 
-      // On récupère toutes les données complètes de ce jour précis
-      const [journalRes, meteoRes, eventRes] = await Promise.all([
+      // 2. AJOUT : On inclut la requête des bonheurs dans le Promise.all
+      const [journalRes, meteoRes, eventRes, bonheurRes] = await Promise.all([
         supabase.from('journal').select('*').eq('date', dateStr).eq('user_id', user.id).order('created_at', { ascending: true }),
-        supabase.from('meteo').select('*').eq('date', dateStr).eq('user_id', user.id).single(), // single() car 1 seule météo max par jour
-        supabase.from('evenements').select('*').eq('date', dateStr).eq('user_id', user.id).order('created_at', { ascending: true })
+        supabase.from('meteo').select('*').eq('date', dateStr).eq('user_id', user.id).single(),
+        supabase.from('evenements').select('*').eq('date', dateStr).eq('user_id', user.id).order('created_at', { ascending: true }),
+        supabase.from('bonheurs').select('items').eq('date', dateStr).eq('user_id', user.id).maybeSingle()
       ])
 
       setDayData({
         journal: journalRes.data || [],
         meteo: meteoRes.data || null,
-        events: eventRes.data || []
+        events: eventRes.data || [],
+        bonheurs: bonheurRes.data?.items || [] // Extraction des items
       })
       setIsLoading(false)
     }
@@ -87,6 +91,22 @@ export default function DayDetailsModal({ date, onClose, onGoToDay }) {
               </div>
             )}
 
+            {/* --- SECTION PETITS BONHEURS --- */}
+            {/* 3. AJOUT : La nouvelle section pour afficher la liste des bonheurs */}
+            {dayData.bonheurs.length > 0 && (
+              <div className="detail-section">
+                <div className="detail-section-header" style={{ color: 'var(--color-bonheur)' }}>
+                  <div className="custom-icon" style={{ WebkitMaskImage: `url(${bonheurIcon})`, backgroundColor: 'var(--color-bonheur)' }}></div>
+                  Petits Bonheurs
+                </div>
+                <ul style={{ margin: 0, paddingLeft: '20px', color: '#ddd', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {dayData.bonheurs.map((item, index) => (
+                    <li key={index} style={{ fontSize: '0.95rem' }}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             {/* --- SECTION ÉVÉNEMENTS --- */}
             {dayData.events.length > 0 && (
               <div className="detail-section">
@@ -126,7 +146,8 @@ export default function DayDetailsModal({ date, onClose, onGoToDay }) {
             )}
 
             {/* Message si tout est vide */}
-            {!dayData.meteo && dayData.events.length === 0 && dayData.journal.length === 0 && (
+            {/* 4. AJOUT : On ajoute la condition pour s'assurer que les bonheurs sont aussi vides avant d'afficher ce message */}
+            {!dayData.meteo && dayData.events.length === 0 && dayData.journal.length === 0 && dayData.bonheurs.length === 0 && (
               <p style={{ textAlign: 'center', color: '#666', fontStyle: 'italic' }}>
                 Rien n'a été consigné ce jour-là.
               </p>
