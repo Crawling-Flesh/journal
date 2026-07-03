@@ -30,6 +30,15 @@ export default function Sidebar({ activeView, setActiveView, isMenuOpen, setIsMe
         <span className="nav-text">Statistiques</span>
       </button>
       
+      {/* NOUVEAU BOUTON GRAPHIQUES */}
+      <button 
+        className={activeView === 'graphiques' ? 'active' : ''} 
+        onClick={() => { setActiveView('graphiques'); setIsMenuOpen(false); }}
+      >
+        <span className="nav-icon">📈</span>
+        <span className="nav-text">Graphiques</span>
+      </button>
+      
       <button 
         className={activeView === 'journal' ? 'active' : ''} 
         onClick={() => { setActiveView('journal'); setIsMenuOpen(false); }}

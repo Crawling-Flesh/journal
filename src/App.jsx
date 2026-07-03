@@ -6,6 +6,7 @@ import './App.css'
 import DailyView from './components/DailyView'
 import JournalPage from './components/JournalPage'
 import StatsPage from './components/StatsPage'
+import GraphiquesPage from './components/GraphiquesPage'
 
 function App() {
   const [session, setSession] = useState(null)
@@ -46,6 +47,8 @@ function App() {
         return <DailyView targetDate={targetDate} />
       case 'stats':
         return <StatsPage onNavigateToDate={handleNavigateToDate} />
+      case 'graphiques':
+        return <GraphiquesPage />
       case 'journal':
         return <JournalPage />
       default:
