@@ -1,0 +1,1179 @@
+:root {
+  /* Couleurs des catégories principales */
+  --color-meteo: #00d2ff;
+  --color-journal: #00ff88;
+  --color-event: #ff3366;
+  
+  /* Couleurs par défaut pour les états inactifs */
+  --color-inactive: #444444;
+}
+
+/* --- Icônes PNG Dynamiques --- */
+.custom-icon {
+  width: 28px;
+  height: 28px;
+  /* Le mask-image s'utilise avec le préfixe webkit pour compatibilité */
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+}
+
+/* Flèches latérales du carrousel */
+.nav-arrow {
+  background: none;
+  border: none;
+  color: #444;
+  font-size: 2.5rem;
+  cursor: pointer;
+  padding: 1rem;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.nav-arrow:hover {
+  color: #fff;
+  transform: scale(1.1);
+}
+
+/* --- Carte Journalière --- */
+.day-card {
+  width: 100%;
+  max-width: 450px;
+  aspect-ratio: 16 / 9;
+  border: 2px solid #f39c12; /* Bordure orange du mockup */
+  border-radius: 16px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #27252c;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  overflow: hidden;
+  
+}
+
+/* --- AJUSTEMENTS MOBILE (RESPONSIVE) --- */
+@media (max-width: 768px) {
+  
+  .date-navigation-container {
+    flex-wrap: wrap; /* Autorise les éléments à passer à la ligne */
+    gap: 1.5rem; /* Espace entre la carte et les flèches */
+  }
+
+  .day-card {
+    order: -1; /* Force la carte à se placer en premier (au-dessus) */
+    flex-basis: 100%; /* Force la carte à prendre toute la largeur dispo, poussant les flèches en dessous */
+    width: 85vw; 
+    max-width: none;
+    padding: 1.5rem 10px;
+  }
+
+  /* On s'assure que le texte reste sur une ligne avec une taille correcte */
+  .day-card h2, 
+  .day-card span,
+  .day-card div {
+    font-size: 1.2rem !important;
+    white-space: nowrap !important;
+  }
+
+  /* Recentrage des icônes internes de la carte (journal/event) */
+  .card-icon.left {
+    left: 10px;
+  }
+  
+  .card-icon.right {
+    right: 10px;
+  }
+}
+
+.date-navigation-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem; /* Grand espace sur PC */
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .date-navigation-container {
+    gap: 0.5rem; /* Petit espace sur mobile pour sauver les flèches ! */
+  }
+}
+
+
+.day-card-date {
+  font-family: monospace;
+  font-size: 1.8rem;
+  color: white;
+  border-bottom: 2px solid white;
+  padding-bottom: 0.5rem;
+  z-index: 2; /* Pour passer au-dessus des dégradés */
+}
+
+.card-icon {
+  position: absolute;
+  bottom: 1rem;
+  font-size: 1.5rem;
+  z-index: 2;
+}
+
+.card-icon.left { left: 1.5rem; }
+.card-icon.right { right: 1.5rem; }
+
+/* --- Menu d'Action Flottant (FAB) --- */
+.fab-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: -20px; /* Remonte légèrement le bouton sur la carte */
+  z-index: 10;
+}
+
+.fab-main {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: #9b59b6;
+  color: white;
+  font-size: 2rem;
+  border: none;
+  cursor: pointer;
+  z-index: 11;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.2s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+
+.fab-main:hover {
+  background-color: #8e44ad;
+}
+
+.fab-main.open {
+  transform: rotate(45deg);
+}
+
+/* Le menu se déploie vers le BAS maintenant */
+.fab-menu {
+  position: absolute;
+  top: 70px; /* Écarté vers le bas */
+  display: flex;
+  gap: 1.5rem; /* Boutons plus espacés */
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-20px) scale(0.8);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.fab-menu.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.fab-item {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  transition: transform 0.2s;
+}
+
+.fab-item:hover {
+  transform: translateY(3px); /* S'enfonce légèrement au clic */
+}
+
+/* Ajustement des icônes dans les petits boutons ronds */
+.fab-item .custom-icon {
+  width: 20px;
+  height: 20px;
+}
+
+
+/* Structure globale */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #2b2b2e;
+  color: #e0e0e0;
+}
+
+/* Barre de navigation (Sidebar sur PC) */
+.sidebar {
+  height: 100vh; /* Force la hauteur à 100% de l'écran */
+  box-sizing: border-box; /* Inclut le padding dans la hauteur totale */
+  width: 65px;
+  background-color: #1e1e1e;
+  border-right: 1px solid #333;
+  padding: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  transition: width 0.2s ease, padding 0.2s ease;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.sidebar:hover {
+  width: 250px;
+  align-items: flex-start; /* Aligne à gauche quand c'est ouvert */
+  padding: 1rem;
+}
+
+/* Le titre de la sidebar */
+.sidebar-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  width: calc(100% - 1rem); /* La même largeur que les boutons */
+  margin: 0 auto;           /* Centrage automatique */
+  padding: 12px;            /* Le même espacement intérieur que les boutons */
+  box-sizing: border-box;
+}
+
+/* Les boutons de navigation */
+.sidebar button {
+  background: none;
+  color: #a0a0a0;
+  border: none;
+  padding: 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  width: calc(100% - 1rem); /* Laisse une marge pour l'arrondi du bouton */
+  margin: 0 auto;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.sidebar:hover button {
+  margin: 0 0.5rem;
+}
+
+.sidebar button:hover {
+  background-color: #2a2a2a;
+  color: #fff;
+}
+
+.sidebar button.active {
+  background-color: #3a3a3a;
+  color: #fff;
+}
+
+.logout-btn {
+  margin-top: auto !important;
+  color: #ff6b6b !important;
+}
+
+/* Espacement entre icône et texte */
+.nav-icon {
+  min-width: 24px;
+  text-align: center;
+  font-size: 1.2rem;
+  margin-right: 1rem;
+  flex-shrink: 0; /* Protège tes emojis */
+}
+
+.logo-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  margin-right: 1rem;
+  flex-shrink: 0; /* Interdit au logo de se rétrécir ou de s'écraser */
+}
+
+/* Disparition du texte quand le menu est replié */
+.sidebar:not(:hover) .nav-text {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.1s ease;
+}
+
+.sidebar:hover .nav-text {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease 0.1s; /* Petit délai pour un rendu plus fluide */
+}
+
+/* Zone d'affichage principale */
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+/* Bouton Hamburger (Mobile uniquement) */
+.hamburger-btn {
+  display: none;
+  background-color: #1e1e1e;
+  color: white;
+  border: none;
+  border-bottom: 1px solid #333;
+  padding: 1rem;
+  font-size: 1.5rem;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+/* Adaptation pour les écrans de téléphone */
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+  
+  .hamburger-btn {
+    display: block;
+  }
+  
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #333;
+    padding: 1rem;
+    display: none; /* Caché par défaut sur mobile */
+  }
+  
+  .sidebar.open {
+    display: flex; /* S'affiche quand on clique sur le hamburger */
+  }
+  
+  .main-content {
+    padding: 1rem;
+  }
+}
+
+/* --- Ajustement du centrage pour le menu fermé --- */
+
+.sidebar:not(:hover) .nav-text {
+  width: 0; /* Le texte fantôme ne pousse plus les icônes */
+  opacity: 0;
+  visibility: hidden;
+}
+
+.sidebar:not(:hover) .nav-icon {
+  margin-right: 0; /* On retire l'espacement prévu pour le texte */
+}
+
+.sidebar:not(:hover) button,
+.sidebar:not(:hover) .sidebar-title {
+  justify-content: center; /* Force le centrage parfait */
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* --- Fenêtres Superposées (Modales) --- */
+.modal-overlay {
+  position: fixed;
+  top: 0; 
+  left: 0; 
+  right: 0; 
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* S'assure que la fenêtre est au-dessus de tout */
+  backdrop-filter: blur(3px); /* Petit effet de flou élégant sur l'arrière-plan */
+}
+
+.modal-content {
+  background-color: #1e1e1e;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  border: 1px solid #333;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  color: #fff;
+  border-bottom: 1px solid #333;
+  padding-bottom: 1rem;
+}
+
+/* Style de l'éditeur de texte */
+.journal-textarea {
+  width: 100%;
+  min-height: 200px;
+  background-color: #121212;
+  color: #e0e0e0;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 1rem;
+  font-family: inherit;
+  font-size: 1rem;
+  resize: vertical; /* Permet d'agrandir la zone de texte à la souris */
+  box-sizing: border-box;
+}
+
+.journal-textarea:focus {
+  outline: none;
+  border-color: #4a6b4a;
+}
+
+/* --- Jauges Météo Façon Néon (Compact) --- */
+.gauge-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.6rem; /* Réduit pour éviter le scroll */
+}
+
+.gauge-label {
+  width: 80px;
+  text-align: right;
+  color: #ddd;
+  font-size: 0.9rem; /* Légèrement réduit */
+}
+
+.gauge-core {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.gauge-value {
+  text-align: center;
+  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 2px;
+  color: #fff;
+}
+
+.gauge-pill {
+  position: relative;
+  height: 28px; /* Plus fin */
+  border-radius: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2px;
+  background-color: #1a1a1a;
+  overflow: hidden;
+  border: 1px solid;
+}
+
+.gauge-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  z-index: 1;
+  transition: width 0.3s ease, opacity 0.3s ease;
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(0, 0, 0, 0.15) 10px,
+    rgba(0, 0, 0, 0.15) 20px
+  );
+}
+
+.gauge-btn {
+  position: relative;
+  z-index: 2;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  width: 24px; /* Plus petit */
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.gauge-btn:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+/* --- Boutons d'action principaux (Icônes) --- */
+.action-buttons-container {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.action-icon-btn {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  transition: transform 0.2s, color 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.action-icon-btn:hover {
+  transform: scale(1.1);
+}
+
+.action-icon-btn span.label {
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+/* --- Formulaire Événement & Tags --- */
+.event-input {
+  width: 100%;
+  padding: 12px;
+  background-color: #121212;
+  color: white;
+  border: 1px solid var(--color-event);
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+
+.event-input:focus {
+  outline: none;
+  box-shadow: 0 0 8px rgba(255, 51, 102, 0.5);
+}
+
+.event-section {
+  margin-bottom: 1.5rem;
+}
+
+.event-section h4 {
+  margin: 0 0 0.8rem 0;
+  color: #aaa;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag-btn {
+  background-color: transparent;
+  color: #aaa;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  /* La bordure prendra la couleur de l'émotion via React */
+  border: 1px solid #555; 
+}
+
+.tag-btn:hover {
+  color: #fff;
+}
+
+/* --- Formulaire Événement --- */
+.event-input {
+  width: 100%;
+  padding: 12px;
+  background-color: #121212;
+  color: white;
+  border: 1px solid #444;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+
+.event-input:focus {
+  outline: none;
+  border-color: #8a4a4a;
+}
+
+.event-section {
+  margin-bottom: 1.5rem;
+}
+
+.event-section h4 {
+  margin: 0 0 0.8rem 0;
+  color: #aaa;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag-btn {
+  background-color: transparent;
+  border: 1px solid #555;
+  color: #aaa;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.tag-btn:hover {
+  border-color: #888;
+  color: #ddd;
+}
+
+.tag-btn.active {
+  background-color: #8a4a4a;
+  border-color: #8a4a4a;
+  color: white;
+}
+
+/* --- Liste du Journal --- */
+.journal-list-modal {
+  max-height: 85vh; /* Pour laisser de la place à la scrollbar */
+}
+
+.journal-entries-container {
+  overflow-y: auto;
+  overflow-x: hidden; /* Empêche formellement la barre horizontale */
+  padding-right: 60px; /* On laisse 60px de vide à droite exprès pour les boutons ! */
+  padding-left: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Scrollbar sombre discrète */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #444;
+}
+
+/* Éléments de la liste */
+.journal-entry-item {
+  padding: 1rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.journal-entry-item:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.journal-entry-item.selected {
+  border-color: var(--color-journal);
+  background-color: rgba(0, 255, 136, 0.05); /* Fond vert très léger */
+}
+
+.entry-time {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+.entry-text {
+  margin: 0;
+  color: #ddd;
+  line-height: 1.5;
+  white-space: pre-wrap; /* Conserve les sauts de ligne */
+}
+
+/* Boutons d'action (Flottants à droite) */
+.entry-actions {
+  position: absolute;
+  right: -50px; /* Ils reculent dans le padding qu'on vient de créer */
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.2s;
+}
+
+.action-btn:hover {
+  transform: scale(1.1);
+}
+
+.action-btn.edit { background-color: #d4af37; }
+.action-btn.delete { background-color: #ff3333; }
+
+/* Zone de texte quand on clique sur Éditer */
+.edit-textarea {
+  width: 100%;
+  min-height: 80px;
+  background-color: #121212;
+  color: #e0e0e0;
+  border: 1px solid #d4af37;
+  border-radius: 6px;
+  padding: 10px;
+  margin-top: 10px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.edit-textarea:focus {
+  outline: none;
+  box-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
+}
+
+/* --- Liste des Événements --- */
+.event-list-container {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.event-list-item {
+  background-color: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 8px;
+  overflow: hidden; /* Coupe ce qui dépasse pour garder les coins arrondis avec les barres de couleur */
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.event-list-item:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-event);
+}
+
+.event-color-bar {
+  display: flex;
+  height: 8px;
+  width: 100%;
+  background-color: #2a2a2a; /* Couleur de fond neutre si aucun tag n'est sélectionné */
+}
+
+.event-color-segment {
+  flex: 1; /* C'est la magie Flexbox : chaque segment prend une part égale */
+  height: 100%;
+}
+
+.event-title-bar {
+  padding: 15px;
+  color: #fff;
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+
+/* --- PAGE JOURNAL GLOBAL --- */
+.journal-page-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  height: 90vh; /* Prend presque toute la hauteur de l'écran pour le scroll */
+}
+
+/* Le sélecteur de mois (Style Mockup) */
+.month-navigator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  background-color: #3f3d3d;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  width: max-content;
+  margin: 0 auto 2rem auto;
+}
+
+.month-navigator button {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 1.2rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: color 0.2s;
+}
+
+.month-navigator button:hover {
+  color: #fff;
+}
+
+.month-navigator h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #fff;
+  text-transform: capitalize;
+  min-width: 150px;
+  text-align: center;
+  cursor: pointer; /* Pour le futur popup de sélection */
+}
+
+/* Le flux des entrées */
+.journal-feed {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem; /* Espace généreux entre chaque jour */
+}
+
+.feed-entry-date {
+  color: var(--color-journal);
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.feed-entry-text {
+  color: #ddd;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+/* --- SÉLECTEUR DE MOIS --- */
+.month-selector-modal {
+  width: 320px;
+  padding: 1.5rem;
+}
+
+.year-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+  color: #fff;
+  font-weight: bold;
+}
+
+.year-header button {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0 10px;
+  transition: color 0.2s;
+}
+
+.year-header button:hover {
+  color: var(--color-journal);
+}
+
+.months-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.month-btn {
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  color: #ddd;
+  padding: 12px 5px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+  position: relative; /* Indispensable pour placer le point en absolu */
+}
+
+.month-btn:hover {
+  background-color: #333;
+  border-color: var(--color-journal);
+}
+
+/* Le mois qu'on est en train de consulter (Vert) */
+.month-btn.active {
+  background-color: rgba(0, 255, 136, 0.15);
+  border-color: var(--color-journal);
+  color: #fff;
+  font-weight: bold;
+}
+
+/* Le mois réel d'aujourd'hui (Jaune) */
+.month-btn.real-current {
+  border-color: #d4af37;
+}
+
+/* Le conteneur des petits points indicateurs */
+.dots-container {
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 3px;
+}
+
+.data-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+}
+
+/* --- PAGE STATISTIQUES --- */
+.stats-page-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stats-filters {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.filter-btn {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 2px solid transparent;
+}
+
+/* --- FILTRES ACTIFS SUR LA GRILLE --- */
+
+/* Style par défaut pour les jours futurs (texte grisé) */
+.day-square.is-future {
+  color: #555 !important;
+  border-color: #333;
+}
+
+/* On garde le halo coloré, mais on ne change plus la couleur du texte à blanc */
+.day-square.has-journal {
+  box-shadow: inset 0 0 10px rgba(0, 255, 136, 0.8);
+  border-color: var(--color-journal) !important;
+}
+
+.day-square.has-event {
+  box-shadow: inset 0 0 10px rgba(255, 51, 51, 0.8);
+  border-color: var(--color-event) !important;
+}
+
+/* Filtre Météo (Bandes de couleur) */
+.meteo-stripes-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  z-index: 1; /* Derrière le numéro du jour */
+  opacity: 0.8;
+}
+
+.meteo-stripe {
+  flex: 1; /* Chaque bande prend une hauteur égale */
+  width: 100%;
+}
+
+/* Le bouton actif grossit légèrement pour qu'on sache où on est */
+.filter-btn.active {
+  transform: scale(1.15);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  border-color: #fff; 
+}
+
+.calendar-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  max-width: 300px; /* Force le passage à la ligne après 5 cases (45*5 + 15*4) */
+}
+
+.day-square {
+  width: 45px;
+  height: 45px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 500;
+  font-size: 1.1rem;
+  color: #fff;
+  background-color: transparent;
+  border: 1px solid #444; /* Gris par défaut pour le futur */
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative; /* Utile pour la suite quand on ajoutera les couleurs */
+  overflow: hidden;
+}
+
+.day-square.past-or-present {
+  border-color: #d4af37; /* Bronze/Or pour les jours passés ou en cours */
+}
+
+.day-square:hover {
+  transform: translateY(-2px);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* --- MODALE DÉTAILS DU JOUR (STATS) --- */
+.day-details-modal {
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.detail-section {
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 1.5rem;
+}
+
+.detail-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
+}
+
+/* Bulles pour les émotions de la météo dans le résumé */
+.mood-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #000;
+  margin: 0 5px 5px 0;
+}
+
+/* --- MODALE BILAN STATISTIQUES --- */
+.stats-summary-modal {
+  width: 90%;
+  max-width: 500px;
+}
+
+.stats-cards-container {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  flex: 1;
+  background-color: #222;
+  border-radius: 10px;
+  padding: 15px;
+  text-align: center;
+  border: 1px solid #444;
+}
+
+.stat-card h3 {
+  margin: 0 0 10px 0;
+  font-size: 2rem;
+  color: #fff;
+}
+
+.stat-card p {
+  margin: 0;
+  color: #aaa;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.mood-averages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mood-average-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.mood-label {
+  width: 100px;
+  color: #ddd;
+  font-weight: 500;
+}
+
+.mood-bar-bg {
+  flex: 1;
+  height: 8px;
+  background-color: #333;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.mood-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease-out;
+}
+
+.mood-value {
+  width: 35px;
+  text-align: right;
+  color: #fff;
+  font-weight: bold;
+}
