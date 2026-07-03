@@ -12,10 +12,10 @@ import EventListModal from './EventListModal'
 const MOODS = {
   'Joie': '#ffd700', 
   'Colère': '#ff3333', 
-  'Peur': '#aa00ff', 
+  'Anxiété': '#aa00ff', 
   'Tristesse': '#0088ff', 
   'Dégoût': '#00cc44', 
-  'Surprise': '#ff8800', 
+  'Stress': '#ff8800', 
   'Anticipation': '#00e5ff', 
   'Confiance': '#a6ff00', 
   'Sérénité': '#e81099'
@@ -23,8 +23,8 @@ const MOODS = {
 const MOOD_CATEGORIES = Object.keys(MOODS)
 
 const MOOD_POSITIONS = {
-  'Joie': '0% 0%', 'Colère': '50% 0%', 'Peur': '100% 0%', 
-  'Tristesse': '0% 50%', 'Dégoût': '50% 50%', 'Surprise': '100% 50%', 
+  'Joie': '0% 0%', 'Colère': '50% 0%', 'Anxiété': '100% 0%',
+  'Tristesse': '0% 50%', 'Dégoût': '50% 50%', 'Stress': '100% 50%',
   'Anticipation': '0% 100%', 'Confiance': '50% 100%', 'Sérénité': '100% 100%'
 }
 
@@ -72,12 +72,12 @@ export default function DailyView({ targetDate }) {
         .maybeSingle() // maybeSingle car on peut ne rien avoir ce jour-là
 
       if (meteoData) {
-        setMeteoValues({
-          'Joie': meteoData.joie, 'Colère': meteoData.colere, 'Peur': meteoData.peur,
-          'Tristesse': meteoData.tristesse, 'Dégoût': meteoData.degout, 'Surprise': meteoData.surprise,
-          'Anticipation': meteoData.anticipation, 'Confiance': meteoData.confiance, 'Sérénité': meteoData.serenite
-        })
-      } else {
+      setMeteoValues({
+        'Joie': meteoData.joie, 'Colère': meteoData.colere, 'Anxiété': meteoData.anxiete,
+        'Tristesse': meteoData.tristesse, 'Dégoût': meteoData.degout, 'Stress': meteoData.stress,
+        'Anticipation': meteoData.anticipation, 'Confiance': meteoData.confiance, 'Sérénité': meteoData.serenite
+      })
+    } else {
         // Remise à zéro si pas de données
         setMeteoValues(MOOD_CATEGORIES.reduce((acc, mood) => ({ ...acc, [mood]: 0 }), {}))
       }
@@ -129,8 +129,8 @@ export default function DailyView({ targetDate }) {
     await supabase.from('meteo').upsert({
       user_id: user.id,
       date: dateStr,
-      joie: meteoValues['Joie'], colere: meteoValues['Colère'], peur: meteoValues['Peur'],
-      tristesse: meteoValues['Tristesse'], degout: meteoValues['Dégoût'], surprise: meteoValues['Surprise'],
+      joie: meteoValues['Joie'], colere: meteoValues['Colère'], anxiete: meteoValues['Anxiété'],
+      tristesse: meteoValues['Tristesse'], degout: meteoValues['Dégoût'], stress: meteoValues['Stress'],
       anticipation: meteoValues['Anticipation'], confiance: meteoValues['Confiance'], serenite: meteoValues['Sérénité']
     }, { onConflict: 'user_id, date' })
 
