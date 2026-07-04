@@ -5,13 +5,14 @@ import { supabase } from '../supabase'
 import MeteoChart from './MeteoChart'
 import ActivityChart from './ActivityChart'
 import MoodRadarChart from './MoodRadarChart'
+import MonthSelectorModal from './MonthSelectorModal'
 
 export default function GraphiquesPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date())
   // On remplace meteoData par un objet contenant tout
   const [monthData, setMonthData] = useState({ journal: [], meteo: [], event: [], bonheur: [] })
   const [isLoading, setIsLoading] = useState(true)
-  
+  const [isMonthSelectorOpen, setIsMonthSelectorOpen] = useState(false)
   const [activeChart, setActiveChart] = useState('line') 
 
   const displayMonth = format(currentMonth, 'MMMM yyyy', { locale: fr })
@@ -57,9 +58,9 @@ export default function GraphiquesPage() {
         <h1 style={{ margin: 0, fontSize: '1.5rem', color: '#fff' }}>Graphiques</h1>
       </div>
 
-      <header className="month-navigator">
+<header className="month-navigator">
         <button onClick={goToPreviousMonth}>&lt;</button>
-        <h2>{displayMonth}</h2>
+        <h2 style={{ cursor: 'pointer' }} onClick={() => setIsMonthSelectorOpen(true)}>{displayMonth}</h2>
         <button onClick={goToNextMonth}>&gt;</button>
       </header>
 
@@ -109,6 +110,16 @@ export default function GraphiquesPage() {
         </>
       ) : (
         <p style={{ textAlign: 'center', color: '#888', marginTop: '2rem' }}>Aucune donnée pour ce mois.</p>
+      )}
+
+      {/* MODALE DE SÉLECTION DE MOIS */}
+      {isMonthSelectorOpen && (
+        <MonthSelectorModal 
+          currentDate={currentMonth}
+          onSelect={(newDate) => setCurrentMonth(newDate)}
+          onClose={() => setIsMonthSelectorOpen(false)}
+          indicators={['journal', 'meteo', 'event', 'bonheur']}
+        />
       )}
     </div>
   )
