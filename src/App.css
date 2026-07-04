@@ -277,6 +277,10 @@
 }
 
 .logout-btn {
+  color: #ff6b6b !important;
+}
+
+.passkey-btn{
   margin-top: auto !important;
   color: #ff6b6b !important;
 }

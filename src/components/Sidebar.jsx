@@ -64,27 +64,11 @@ const handleRegisterPasskey = async () => {
         <span className="nav-text">Journal</span>
       </button>
 
-<button 
-  onClick={handleRegisterPasskey} 
-  style={{
-    background: 'rgba(0, 229, 255, 0.1)',
-    border: '1px solid rgba(0, 229, 255, 0.3)',
-    color: '#00e5ff',
-    padding: '6px 12px',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '12px',
-    fontWeight: '500',
-    margin: '10px 16px',
-    width: 'calc(100% - 32px)',
-    textAlign: 'center',
-    transition: 'all 0.2s'
-  }}
-  onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0, 229, 255, 0.2)'}
-  onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0, 229, 255, 0.1)'}
->
-  ⚙️ Enregistrer ce Passkey
-</button>
+{/* BOUTON TEMPORAIRE POUR CREER LE PASSKEY */}
+      <button className="passkey-btn" onClick={handleRegisterPasskey}>
+        <span className="nav-icon">🔑</span>
+        <span className="nav-text">Créer un Passkey</span>
+      </button>
 
       <button className="logout-btn" onClick={handleLogout}>
         <span className="nav-icon">🔒</span>
