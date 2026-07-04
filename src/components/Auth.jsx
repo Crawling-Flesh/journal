@@ -7,6 +7,7 @@ export default function Auth() {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
 
+  // Connexion classique
   const handleLogin = async (e) => {
     e.preventDefault()
     setLoading(true)
@@ -19,6 +20,20 @@ export default function Auth() {
 
     if (error) {
       console.error("Erreur brute :", error)
+      setError(error.message)
+    }
+    setLoading(false)
+  }
+
+  // Nouvelle connexion biométrique
+  const handlePasskeyLogin = async () => {
+    setLoading(true)
+    setError(null)
+    
+    const { error } = await supabase.auth.signInWithPasskey()
+
+    if (error) {
+      console.error("Erreur Passkey :", error)
       setError(error.message)
     }
     setLoading(false)
@@ -47,12 +62,33 @@ export default function Auth() {
           style={{ padding: '10px', width: '250px', borderRadius: '4px', border: 'none' }}
         />
         {error && <p style={{ color: '#ff6b6b', margin: 0 }}>{error}</p>}
+        
         <button 
           type="submit" 
           disabled={loading}
-          style={{ padding: '10px 20px', cursor: loading ? 'wait' : 'pointer', fontWeight: 'bold' }}
+          style={{ padding: '10px 20px', cursor: loading ? 'wait' : 'pointer', fontWeight: 'bold', width: '250px' }}
         >
-          {loading ? 'Vérification...' : 'Déverrouiller'}
+          {loading ? 'Vérification...' : 'Déverrouiller avec le mot de passe'}
+        </button>
+
+        <div style={{ width: '250px', borderBottom: '1px solid #555', margin: '10px 0' }}></div>
+
+        <button 
+          type="button" 
+          onClick={handlePasskeyLogin}
+          disabled={loading}
+          style={{ 
+            padding: '10px 20px', 
+            cursor: loading ? 'wait' : 'pointer', 
+            backgroundColor: 'transparent', 
+            border: '1px solid #00e5ff', 
+            color: '#00e5ff', 
+            borderRadius: '4px', 
+            fontWeight: 'bold',
+            width: '250px'
+          }}
+        >
+          {loading ? 'Vérification...' : 'Connexion par Passkey'}
         </button>
       </form>
     </div>

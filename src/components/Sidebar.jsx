@@ -3,6 +3,23 @@ import logoJournal from '../assets/logojournal.gif'
 
 export default function Sidebar({ activeView, setActiveView, isMenuOpen, setIsMenuOpen }) {
   
+const handleRegisterPasskey = async () => {
+    try {
+      // Appel de la nouvelle API dédiée aux Passkeys
+      const { data, error } = await supabase.auth.registerPasskey()
+
+      if (error) {
+        console.error("Échec de l'enrôlement :", error.message)
+        alert("La forge a échoué : " + error.message)
+        return
+      }
+
+      alert("Clé biométrique forgée avec succès ! Ton appareil est enregistré.")
+    } catch (err) {
+      console.error("Erreur inattendue :", err)
+    }
+  }
+
   const handleLogout = async () => {
     await supabase.auth.signOut()
   }
@@ -45,6 +62,12 @@ export default function Sidebar({ activeView, setActiveView, isMenuOpen, setIsMe
       >
         <span className="nav-icon">📖</span>
         <span className="nav-text">Journal</span>
+      </button>
+
+{/* BOUTON TEMPORAIRE POUR CREER LE PASSKEY */}
+      <button className="logout-btn" onClick={handleRegisterPasskey} style={{ borderColor: '#00e5ff', color: '#00e5ff', marginBottom: '1rem' }}>
+        <span className="nav-icon">🔑</span>
+        <span className="nav-text">Créer un Passkey</span>
       </button>
 
       <button className="logout-btn" onClick={handleLogout}>

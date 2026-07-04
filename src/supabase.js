@@ -8,6 +8,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     storage: window.sessionStorage, // C'est cette ligne qui fait la magie
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
+    experimental: { passkey: true } // <-- L'instruction pour autoriser les Passkeys
   }
 })
