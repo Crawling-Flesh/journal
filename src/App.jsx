@@ -7,6 +7,7 @@ import DailyView from './components/DailyView'
 import JournalPage from './components/JournalPage'
 import StatsPage from './components/StatsPage'
 import GraphiquesPage from './components/GraphiquesPage'
+import ExportPage from './components/ExportPage'
 
 function App() {
   const [session, setSession] = useState(null)
@@ -40,7 +41,7 @@ function App() {
     return <Auth />
   }
 
-  // --- FONCTION DE RENDU DES VUES ---
+// --- FONCTION DE RENDU DES VUES ---
  const renderView = () => {
     switch (activeView) {
       case 'calendar':
@@ -51,6 +52,8 @@ function App() {
         return <GraphiquesPage />
       case 'journal':
         return <JournalPage />
+      case 'export':
+        return <ExportPage />
       default:
         return <div>Vue introuvable</div>
     }

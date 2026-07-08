@@ -64,6 +64,15 @@ const handleRegisterPasskey = async () => {
         <span className="nav-text">Journal</span>
       </button>
 
+{/* BOUTON EXPORT */}
+      <button 
+        className={activeView === 'export' ? 'active' : ''} 
+        onClick={() => { setActiveView('export'); setIsMenuOpen(false); }}
+      >
+        <span className="nav-icon">📤</span>
+        <span className="nav-text">Exporter</span>
+      </button>
+
 {/* BOUTON TEMPORAIRE POUR CREER LE PASSKEY */}
       <button className="passkey-btn" onClick={handleRegisterPasskey}>
         <span className="nav-icon">🔑</span>
