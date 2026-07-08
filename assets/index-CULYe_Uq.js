@@ -117,8 +117,15 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
           }
           h2 { 
             margin-top: 30px; 
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             font-weight: normal;
+          }
+          .ai-context {
+            font-size: 0.85em;
+            color: #777777;
+            font-style: italic;
+            margin-bottom: 20px;
+            line-height: 1.4;
           }
           .entry { 
             border-left: 3px solid; 
@@ -146,7 +153,7 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
             margin-bottom: 5px;
           }
 
-          /* --- Nouvelles couleurs par catégorie --- */
+          /* --- Couleurs par catégorie --- */
           .theme-journal h2, .theme-journal .date { color: #00ff88; }
           .theme-journal .entry { border-left-color: #00ff88; }
           
@@ -163,8 +170,25 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
       <body>
         <div class="container">
           <h1>Mon Journal</h1>
-          <p style="text-align: center; color: #888;">Export des données du <strong>${t}</strong> au <strong>${n}</strong></p>
-    `;return e.journal&&e.journal.length>0&&(r+=`<div class="theme-journal"><h2>📖 Journal</h2>`,e.journal.forEach(e=>{r+=`<div class="entry"><div class="date">${e.date}</div><div class="content">${e.texte||``}</div></div>`}),r+=`</div>`),e.meteo&&e.meteo.length>0&&(r+=`<div class="theme-meteo"><h2>🌤️ Météo Intérieure</h2>`,e.meteo.forEach(e=>{let t=Object.keys(e).filter(t=>![`id`,`user_id`,`date`,`created_at`].includes(t)&&e[t]>0).map(t=>`${t.charAt(0).toUpperCase()+t.slice(1)}: ${e[t]}/5`).join(`, `);t&&(r+=`<div class="entry"><div class="date">${e.date}</div><div class="content">${t}</div></div>`)}),r+=`</div>`),e.evenements&&e.evenements.length>0&&(r+=`<div class="theme-evenements"><h2>📅 Événements</h2>`,e.evenements.forEach(e=>{r+=`<div class="entry"><div class="date">${e.date}</div><div class="content">${e.titre||``}</div></div>`}),r+=`</div>`),e.bonheurs&&e.bonheurs.length>0&&(r+=`<div class="theme-bonheurs"><h2>✨ Petits Bonheurs</h2>`,e.bonheurs.forEach(e=>{let t=``;Array.isArray(e.items)&&(t=`<ul>${e.items.map(e=>`<li>${e}</li>`).join(``)}</ul>`),r+=`<div class="entry"><div class="date">${e.date}</div>${t}</div>`}),r+=`</div>`),r+=`
+          <p style="text-align: center; color: #888; margin-bottom: 5px;">Export des données du <strong>${t}</strong> au <strong>${n}</strong></p>
+          <div class="ai-context" style="text-align: center; margin-bottom: 30px;">
+            Document généré automatiquement. Ce fichier compile des entrées de journal personnel classées par catégories pour faciliter l'analyse temporelle et sémantique.
+          </div>
+    `;if(e.journal&&e.journal.length>0&&(r+=`<div class="theme-journal">
+        <h2>📖 Journal</h2>
+        <div class="ai-context">Contexte de la section : Entrées textuelles libres décrivant le déroulement de la journée, les réflexions personnelles et l'état d'esprit général. Note temporelle : L'heure affichée correspond à l'enregistrement dans la base de données. La présence de la mention '(écrit à une date ultérieure)' indique que la saisie a été effectuée a posteriori ; par conséquent, l'heure de ces entrées différées reflète l'instant de la rédaction et non l'heure réelle des événements relatés.</div>`,e.journal.forEach(e=>{let t=e.date,n=``;if(e.created_at){let r=Bo(e.date),i=new Date(e.created_at),a=V(i,`yyyy-MM-dd`)>e.date;t=`${V(r,`dd MMMM yyyy`,{locale:Cs})} - ${V(i,`HH'h'mm`)}`,a&&(n=` <span style="font-size: 0.85em; font-style: italic; color: #888; margin-left: 10px;">(écrit à une date ultérieure)</span>`)}r+=`<div class="entry"><div class="date">${t}${n}</div><div class="content">${e.texte||``}</div></div>`}),r+=`</div>`),e.meteo&&e.meteo.length>0){r+=`<div class="theme-meteo">
+        <h2>🌤️ Météo Intérieure</h2>
+        <div class="ai-context">Contexte de la section : Évaluation quantitative des émotions ressenties. Les valeurs représentent une intensité sur une échelle de 1 (faible) à 5 (fort). Plus le score est faible, plus la couleur est pastel et claire.</div>`;let t={joie:{label:`Joie`,hex:`#ffd700`},colere:{label:`Colère`,hex:`#ff3333`},anxiete:{label:`Anxiété`,hex:`#aa00ff`},tristesse:{label:`Tristesse`,hex:`#0088ff`},degout:{label:`Dégoût`,hex:`#00cc44`},stress:{label:`Stress`,hex:`#ff8800`},anticipation:{label:`Anticipation`,hex:`#00e5ff`},confiance:{label:`Confiance`,hex:`#a6ff00`},serenite:{label:`Sérénité`,hex:`#e81099`}};e.meteo.forEach(e=>{let n=Object.keys(e).filter(n=>t[n]&&e[n]>0).map(n=>{let r=e[n],i=t[n],a=30+(r-1)*17.5;return`<span style="color: ${`color-mix(in srgb, ${i.hex} ${a}%, #ffffff)`}; font-weight: bold; margin-right: 15px; font-size: 1.05em; display: inline-block;">${i.label}: ${r}/5</span>`}).join(``);n&&(r+=`<div class="entry"><div class="date">${e.date}</div><div style="display: flex; flex-wrap: wrap;">${n}</div></div>`)}),r+=`</div>`}if(e.evenements&&e.evenements.length>0){r+=`<div class="theme-evenements">
+        <h2>📅 Événements</h2>
+        <div class="ai-context">Contexte de la section : Liste des faits marquants survenus lors de la journée, accompagnés des émotions (météo intérieure) ressenties spécifiquement avant, pendant et après l'événement.</div>`;let t={Joie:`#ffd700`,Colère:`#ff3333`,Anxiété:`#aa00ff`,Tristesse:`#0088ff`,Dégoût:`#00cc44`,Stress:`#ff8800`,Anticipation:`#00e5ff`,Confiance:`#a6ff00`,Sérénité:`#e81099`},n=e=>e.map(e=>{let n=t[e]||`#555`;return`<span style="display: inline-block; padding: 2px 12px; margin: 0 6px 4px 0; border: 1px solid ${n}; border-radius: 15px; font-size: 0.85em; color: #fff; background-color: ${n}33;">${e}</span>`}).join(``);e.evenements.forEach(e=>{let t=``,i=e.tags_avant&&e.tags_avant.length>0,a=e.tags_pendant&&e.tags_pendant.length>0,o=e.tags_apres&&e.tags_apres.length>0;if(i||a||o){t+=`<div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #555;">`,t+=`<div style="font-size: 0.85em; text-transform: uppercase; color: #ff3366; margin-bottom: 10px; letter-spacing: 1px;">Météo intérieure</div>`;let r=`display: flex; align-items: center; margin-bottom: 6px; flex-wrap: wrap;`,s=`color: #bbb; font-weight: bold; font-size: 0.9em; min-width: 80px; margin-bottom: 4px;`;i&&(t+=`<div style="${r}"><span style="${s}">Avant :</span> <div style="display: flex; flex-wrap: wrap;">${n(e.tags_avant)}</div></div>`),a&&(t+=`<div style="${r}"><span style="${s}">Pendant :</span> <div style="display: flex; flex-wrap: wrap;">${n(e.tags_pendant)}</div></div>`),o&&(t+=`<div style="${r}"><span style="${s}">Après :</span> <div style="display: flex; flex-wrap: wrap;">${n(e.tags_apres)}</div></div>`),t+=`</div>`}r+=`<div class="entry" style="padding-bottom: 10px;">
+          <div class="date" style="margin-bottom: 2px;">${e.date}</div>
+          <div style="color: #cccccc;">
+            <div style="font-size: 1.2em; color: #fff; font-weight: bold; margin-bottom: 4px;">${e.titre||``}</div>
+            ${t}
+          </div>
+        </div>`}),r+=`</div>`}return e.bonheurs&&e.bonheurs.length>0&&(r+=`<div class="theme-bonheurs">
+        <h2>✨ Petits Bonheurs</h2>
+        <div class="ai-context">Contexte de la section : Liste à puces recensant les moments de gratitude, les interactions positives ou les petites joies du quotidien.</div>`,e.bonheurs.forEach(e=>{let t=``;Array.isArray(e.items)&&(t=`<ul>${e.items.map(e=>`<li>${e}</li>`).join(``)}</ul>`),r+=`<div class="entry"><div class="date">${e.date}</div>${t}</div>`}),r+=`</div>`),r+=`
         </div>
       </body>
       </html>
