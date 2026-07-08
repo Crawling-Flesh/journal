@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { supabase } from '../supabase'
-import { format, subDays } from 'date-fns'
+import { format, subDays, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
+
 
 export default function ExportPage() {
   // Par défaut, on propose d'exporter les 7 derniers jours
@@ -114,8 +115,15 @@ export default function ExportPage() {
           }
           h2 { 
             margin-top: 30px; 
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             font-weight: normal;
+          }
+          .ai-context {
+            font-size: 0.85em;
+            color: #777777;
+            font-style: italic;
+            margin-bottom: 20px;
+            line-height: 1.4;
           }
           .entry { 
             border-left: 3px solid; 
@@ -143,7 +151,7 @@ export default function ExportPage() {
             margin-bottom: 5px;
           }
 
-          /* --- Nouvelles couleurs par catégorie --- */
+          /* --- Couleurs par catégorie --- */
           .theme-journal h2, .theme-journal .date { color: #00ff88; }
           .theme-journal .entry { border-left-color: #00ff88; }
           
@@ -160,42 +168,145 @@ export default function ExportPage() {
       <body>
         <div class="container">
           <h1>Mon Journal</h1>
-          <p style="text-align: center; color: #888;">Export des données du <strong>${start}</strong> au <strong>${end}</strong></p>
+          <p style="text-align: center; color: #888; margin-bottom: 5px;">Export des données du <strong>${start}</strong> au <strong>${end}</strong></p>
+          <div class="ai-context" style="text-align: center; margin-bottom: 30px;">
+            Document généré automatiquement. Ce fichier compile des entrées de journal personnel classées par catégories pour faciliter l'analyse temporelle et sémantique.
+          </div>
     `;
 
-    if (data.journal && data.journal.length > 0) {
-      html += `<div class="theme-journal"><h2>📖 Journal</h2>`;
+if (data.journal && data.journal.length > 0) {
+      html += `<div class="theme-journal">
+        <h2>📖 Journal</h2>
+        <div class="ai-context">Contexte de la section : Entrées textuelles libres décrivant le déroulement de la journée, les réflexions personnelles et l'état d'esprit général. Note temporelle : L'heure affichée correspond à l'enregistrement dans la base de données. La présence de la mention '(écrit à une date ultérieure)' indique que la saisie a été effectuée a posteriori ; par conséquent, l'heure de ces entrées différées reflète l'instant de la rédaction et non l'heure réelle des événements relatés.</div>`;
+      
       data.journal.forEach(item => {
-        html += `<div class="entry"><div class="date">${item.date}</div><div class="content">${item.texte || ''}</div></div>`;
+        let displayDate = item.date;
+        let retroactiveBadge = '';
+
+        if (item.created_at) {
+          const dayDate = parseISO(item.date);
+          const timeDate = new Date(item.created_at);
+          
+          const createdDateString = format(timeDate, 'yyyy-MM-dd');
+          const isRetroactive = createdDateString > item.date;
+          
+          displayDate = `${format(dayDate, "dd MMMM yyyy", { locale: fr })} - ${format(timeDate, "HH'h'mm")}`;
+          
+          if (isRetroactive) {
+            retroactiveBadge = ` <span style="font-size: 0.85em; font-style: italic; color: #888; margin-left: 10px;">(écrit à une date ultérieure)</span>`;
+          }
+        }
+
+        html += `<div class="entry"><div class="date">${displayDate}${retroactiveBadge}</div><div class="content">${item.texte || ''}</div></div>`;
       });
       html += `</div>`;
     }
 
-    if (data.meteo && data.meteo.length > 0) {
-      html += `<div class="theme-meteo"><h2>🌤️ Météo Intérieure</h2>`;
+if (data.meteo && data.meteo.length > 0) {
+      html += `<div class="theme-meteo">
+        <h2>🌤️ Météo Intérieure</h2>
+        <div class="ai-context">Contexte de la section : Évaluation quantitative des émotions ressenties. Les valeurs représentent une intensité sur une échelle de 1 (faible) à 5 (fort). Plus le score est faible, plus la couleur est pastel et claire.</div>`;
+
+      const meteoColors = {
+        'joie': { label: 'Joie', hex: '#ffd700' },
+        'colere': { label: 'Colère', hex: '#ff3333' },
+        'anxiete': { label: 'Anxiété', hex: '#aa00ff' },
+        'tristesse': { label: 'Tristesse', hex: '#0088ff' },
+        'degout': { label: 'Dégoût', hex: '#00cc44' },
+        'stress': { label: 'Stress', hex: '#ff8800' },
+        'anticipation': { label: 'Anticipation', hex: '#00e5ff' },
+        'confiance': { label: 'Confiance', hex: '#a6ff00' },
+        'serenite': { label: 'Sérénité', hex: '#e81099' }
+      };
+
       data.meteo.forEach(item => {
-        const emotions = Object.keys(item)
-          .filter(key => !['id', 'user_id', 'date', 'created_at'].includes(key) && item[key] > 0)
-          .map(key => `${key.charAt(0).toUpperCase() + key.slice(1)}: ${item[key]}/5`)
-          .join(', ');
+        const emotionTags = Object.keys(item)
+          .filter(key => meteoColors[key] && item[key] > 0)
+          .map(key => {
+            const score = item[key];
+            const mood = meteoColors[key];
+            
+            // Calcul du pourcentage : 
+            // Score 1 = 30% couleur pure (70% blanc) -> Très clair/pastel
+            // Score 5 = 100% couleur pure
+            const colorPercentage = 30 + ((score - 1) * 17.5); 
+            
+            // On utilise color-mix pour mélanger la couleur avec du blanc, sans opacité
+            const textColor = `color-mix(in srgb, ${mood.hex} ${colorPercentage}%, #ffffff)`;
+            
+            return `<span style="color: ${textColor}; font-weight: bold; margin-right: 15px; font-size: 1.05em; display: inline-block;">${mood.label}: ${score}/5</span>`;
+          })
+          .join('');
         
-        if (emotions) {
-          html += `<div class="entry"><div class="date">${item.date}</div><div class="content">${emotions}</div></div>`;
+        if (emotionTags) {
+          // On retire également la class="content" ici pour éviter les sauts de ligne indésirables
+          html += `<div class="entry"><div class="date">${item.date}</div><div style="display: flex; flex-wrap: wrap;">${emotionTags}</div></div>`;
         }
       });
       html += `</div>`;
     }
 
-    if (data.evenements && data.evenements.length > 0) {
-      html += `<div class="theme-evenements"><h2>📅 Événements</h2>`;
+if (data.evenements && data.evenements.length > 0) {
+      html += `<div class="theme-evenements">
+        <h2>📅 Événements</h2>
+        <div class="ai-context">Contexte de la section : Liste des faits marquants survenus lors de la journée, accompagnés des émotions (météo intérieure) ressenties spécifiquement avant, pendant et après l'événement.</div>`;
+      
+      // Palette de couleurs pour recréer les balises dans l'export
+      const moodColors = {
+        'Joie': '#ffd700', 'Colère': '#ff3333', 'Anxiété': '#aa00ff', 
+        'Tristesse': '#0088ff', 'Dégoût': '#00cc44', 'Stress': '#ff8800', 
+        'Anticipation': '#00e5ff', 'Confiance': '#a6ff00', 'Sérénité': '#e81099'
+      };
+
+      // Fonction pour générer le HTML d'une balise
+      const renderTags = (tags) => {
+        return tags.map(mood => {
+          const color = moodColors[mood] || '#555';
+          return `<span style="display: inline-block; padding: 2px 12px; margin: 0 6px 4px 0; border: 1px solid ${color}; border-radius: 15px; font-size: 0.85em; color: #fff; background-color: ${color}33;">${mood}</span>`;
+        }).join('');
+      };
+
       data.evenements.forEach(item => {
-        html += `<div class="entry"><div class="date">${item.date}</div><div class="content">${item.titre || ''}</div></div>`;
+        let tagsHtml = '';
+        const hasAvant = item.tags_avant && item.tags_avant.length > 0;
+        const hasPendant = item.tags_pendant && item.tags_pendant.length > 0;
+        const hasApres = item.tags_apres && item.tags_apres.length > 0;
+
+        if (hasAvant || hasPendant || hasApres) {
+          tagsHtml += `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #555;">`;
+          tagsHtml += `<div style="font-size: 0.85em; text-transform: uppercase; color: #ff3366; margin-bottom: 10px; letter-spacing: 1px;">Météo intérieure</div>`;
+          
+          const rowStyle = "display: flex; align-items: center; margin-bottom: 6px; flex-wrap: wrap;";
+          const labelStyle = "color: #bbb; font-weight: bold; font-size: 0.9em; min-width: 80px; margin-bottom: 4px;";
+
+          if (hasAvant) {
+            tagsHtml += `<div style="${rowStyle}"><span style="${labelStyle}">Avant :</span> <div style="display: flex; flex-wrap: wrap;">${renderTags(item.tags_avant)}</div></div>`;
+          }
+          if (hasPendant) {
+            tagsHtml += `<div style="${rowStyle}"><span style="${labelStyle}">Pendant :</span> <div style="display: flex; flex-wrap: wrap;">${renderTags(item.tags_pendant)}</div></div>`;
+          }
+          if (hasApres) {
+            tagsHtml += `<div style="${rowStyle}"><span style="${labelStyle}">Après :</span> <div style="display: flex; flex-wrap: wrap;">${renderTags(item.tags_apres)}</div></div>`;
+          }
+          
+          tagsHtml += `</div>`;
+        }
+
+html += `<div class="entry" style="padding-bottom: 10px;">
+          <div class="date" style="margin-bottom: 2px;">${item.date}</div>
+          <div style="color: #cccccc;">
+            <div style="font-size: 1.2em; color: #fff; font-weight: bold; margin-bottom: 4px;">${item.titre || ''}</div>
+            ${tagsHtml}
+          </div>
+        </div>`;
       });
       html += `</div>`;
     }
 
     if (data.bonheurs && data.bonheurs.length > 0) {
-      html += `<div class="theme-bonheurs"><h2>✨ Petits Bonheurs</h2>`;
+      html += `<div class="theme-bonheurs">
+        <h2>✨ Petits Bonheurs</h2>
+        <div class="ai-context">Contexte de la section : Liste à puces recensant les moments de gratitude, les interactions positives ou les petites joies du quotidien.</div>`;
       data.bonheurs.forEach(item => {
         let listItems = '';
         if (Array.isArray(item.items)) {
