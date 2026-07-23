@@ -26,6 +26,18 @@ export default function MeteoChart({ meteoData, currentMonth }) {
     );
   };
 
+// 1. Détecter quelles émotions ont été ressenties au moins une fois dans le mois
+  const activeMoods = new Set();
+  meteoData.forEach(dayData => {
+    MOOD_CATEGORIES.forEach(mood => {
+      const dbColumn = mood.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      if (dayData[dbColumn] > 0) {
+        activeMoods.add(mood);
+      }
+    });
+  });
+
+  // 2. Générer les points du graphique
   const chartData = days.map(day => {
     const dateStr = format(day, 'yyyy-MM-dd');
     const dayData = meteoData.find(m => m.date === dateStr);
@@ -36,7 +48,14 @@ export default function MeteoChart({ meteoData, currentMonth }) {
 
     MOOD_CATEGORIES.forEach(mood => {
       const dbColumn = mood.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      dayObj[mood] = dayData && dayData[dbColumn] > 0 ? dayData[dbColumn] : null;
+      
+      if (activeMoods.has(mood)) {
+        // L'émotion a été présente ce mois-ci : on affiche sa vraie valeur, ou 0 si elle n'a pas été encodée ce jour-là
+        dayObj[mood] = (dayData && dayData[dbColumn] !== undefined && dayData[dbColumn] !== null) ? dayData[dbColumn] : 0;
+      } else {
+        // L'émotion n'a jamais été présente du mois : on laisse à null pour cacher la ligne
+        dayObj[mood] = null;
+      }
     });
 
     return dayObj;
