@@ -279,12 +279,12 @@ const [currentUser, setCurrentUser] = useState(null); // On sauvegarde l'utilisa
                <button className="fab-item" style={{ backgroundColor: 'var(--color-journal)' }} onClick={() => openModal('journal')}>
                 <div className="custom-icon" style={{ WebkitMaskImage: `url(${journalIcon})`, backgroundColor: '#000' }}></div>
               </button>
+              <button className="fab-item" style={{ backgroundColor: '#ffd700' }} onClick={() => openModal('bonheur')}>
+  <div className="custom-icon" style={{ WebkitMaskImage: `url(${bonheurIcon})`, backgroundColor: '#000' }}></div>
+              </button>
               <button className="fab-item" style={{ backgroundColor: 'var(--color-event)' }} onClick={() => openModal('event')}>
                 <div className="custom-icon" style={{ WebkitMaskImage: `url(${eventIcon})`, backgroundColor: '#000' }}></div>
               </button>
-              <button className="fab-item" style={{ backgroundColor: '#ffd700' }} onClick={() => openModal('bonheur')}>
-  <div className="custom-icon" style={{ WebkitMaskImage: `url(${bonheurIcon})`, backgroundColor: '#000' }}></div>
-</button>
             </div>
           </div>
         </div>
